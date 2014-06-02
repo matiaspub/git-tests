@@ -83,7 +83,22 @@ while ($arUser = $rsUsers->Fetch()) {
 	$arUsers[ $arUser['ID'] ] = $arUser;
 }
 
-// Корзины пользователей
+$rsOrderBasket = CSaleBasket::GetList(array('SORT' => 'ASC'),
+	array(
+		'USER_ID' => array_keys($arUsers),
+		'!=ORDER_ID' => false,
+		'>DATE_INSERT' => $dateMonthAgo,
+		'DELAY' => 'Y'
+	),
+	false,
+	false,
+	array('PRODUCT_ID', 'USER_ID', 'DATE_UPDATE')
+);
+while($arOrderBasket = $rsOrderBasket->Fetch()){
+	$arUserBasketOrdered[ $arOrderBasket['USER_ID'] ][] = $arOrderBasket['PRODUCT_ID'];
+}
+
+// Раннее заказанные товары пользователей
 $rsBasket = CSaleBasket::GetList(
 	array('SORT' => 'ASC'),
 	array(
@@ -95,10 +110,11 @@ $rsBasket = CSaleBasket::GetList(
 	false,
 	array('PRODUCT_ID', 'USER_ID', 'DATE_UPDATE')
 );
-
 while ($arBasket = $rsBasket->Fetch()) {
 	$arProducts[$arBasket['PRODUCT_ID']] = true;
-	$usersBasket[$arBasket['USER_ID']][] = $arBasket['PRODUCT_ID'];
+	if (!in_array($arBasket['PRODUCT_ID'], $arUserBasketOrdered)) {
+		$usersBasket[$arBasket['USER_ID']][] = $arBasket['PRODUCT_ID'];
+	}
 }
 
 // Продукты корзины
