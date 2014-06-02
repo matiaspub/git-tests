@@ -83,6 +83,7 @@ while ($arUser = $rsUsers->Fetch()) {
 	$arUsers[ $arUser['ID'] ] = $arUser;
 }
 
+// Ранее заказанные товары пользователей
 $rsOrderBasket = CSaleBasket::GetList(array('SORT' => 'ASC'),
 	array(
 		'USER_ID' => array_keys($arUsers),
@@ -92,13 +93,12 @@ $rsOrderBasket = CSaleBasket::GetList(array('SORT' => 'ASC'),
 	),
 	false,
 	false,
-	array('PRODUCT_ID', 'USER_ID', 'DATE_UPDATE')
-);
+	array('PRODUCT_ID', 'USER_ID', 'DATE_UPDATE'));
 while($arOrderBasket = $rsOrderBasket->Fetch()){
 	$arUserBasketOrdered[ $arOrderBasket['USER_ID'] ][] = $arOrderBasket['PRODUCT_ID'];
 }
 
-// Раннее заказанные товары пользователей
+// Корзины пользователей
 $rsBasket = CSaleBasket::GetList(
 	array('SORT' => 'ASC'),
 	array(
